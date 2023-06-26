@@ -1,0 +1,23 @@
+{
+  "name": "openmusic-api-versi-1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-dev": "nodemon ./src/server.js",
+    "lint": "eslint ./src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/hapi": "^21.3.2",
+    "dotenv": "^16.3.1",
+    "joi": "^17.9.2",
+    "nanoid": "^3.1.20"
+  },
+  "devDependencies": {
+    "eslint": "^8.43.0"
+  }
+}
