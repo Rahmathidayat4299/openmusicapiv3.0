@@ -8,7 +8,7 @@ class SongsService {
     this._songs = [];
   }
 
-  addSong({ title, year, genre, performer, duration, albumId }) {
+  async addSong({ title, year, genre, performer, duration, albumId }) {
     const id = nanoid(16);
 
     const newSong = {
@@ -33,10 +33,19 @@ class SongsService {
   }
 
   getSongs() {
-    return this._songs;
+    const songsData = this._songs.map((song) => {
+      return {
+        id: song.id,
+        title: song.title,
+        performer: song.performer,
+      };
+    });
+  
+    return songsData;
   }
+  
 
-  getSongById(id) {
+  async getSongById(id) {
     const song = this._songs.find((s) => s.id === id);
 
     if (!song) {
@@ -46,7 +55,7 @@ class SongsService {
     return song;
   }
 
-  editSongById(id, { title, year, genre, performer, duration, albumId }) {
+  async editSongById(id, { title, year, genre, performer, duration, albumId }) {
     const songIndex = this._songs.findIndex((song) => song.id === id);
 
     if (songIndex === -1) {
@@ -64,7 +73,7 @@ class SongsService {
     };
   }
 
-  deleteSongById(id) {
+  async deleteSongById(id) {
     const songIndex = this._songs.findIndex((song) => song.id === id);
 
     if (songIndex === -1) {

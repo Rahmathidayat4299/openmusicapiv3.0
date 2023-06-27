@@ -28,7 +28,6 @@ class AlbumHandler {
         },
       });
       response.code(201);
-      console.error(error)
       return response;
     } catch (error) {
       if (error instanceof ClientError) {
