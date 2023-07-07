@@ -10,6 +10,7 @@ exports.up = (pgm) => {
         name: {
             type: 'varchar(50)',
             notNull: true,
+            check: 'char_length(name) <= 50',
         },
         year: {
             type: 'integer',
