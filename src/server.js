@@ -2,12 +2,19 @@
 /* eslint-disable no-undef */
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+//album
 const albums = require('./api/albums');
 const AlbumService = require('./service/albums/AlbumServices');
 const AlbumValidator = require('./validator/albums/index');
+//songs
 const songs = require('./api/songs');
 const SongsService = require('./service/songs/SongsServices');
 const SongsValidator = require('./validator/songs/index');
+
+//user
+const users = require('./api/user');
+const UsersService = require('./service/users/UsersService');
+const UsersValidator = require('./validator/user');
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
@@ -15,6 +22,7 @@ const init = async () => {
   const albumValidator = AlbumValidator;
   const songsService = new SongsService();
   const songsValidator = SongsValidator;
+  const usersService = new UsersService();
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -69,6 +77,13 @@ const init = async () => {
         validator: songsValidator,
       },
     },
+    {
+      plugin: users,
+      options:{
+        service:usersService,
+        validator: UsersValidator
+      }
+    }
   ]);
 
   await server.start();
