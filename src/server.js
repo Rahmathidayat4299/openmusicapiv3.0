@@ -1,21 +1,29 @@
 /* eslint-disable no-dupe-keys */
 /* eslint-disable no-undef */
-require('dotenv').config();
-const Hapi = require('@hapi/hapi');
+require("dotenv").config();
+const Hapi = require("@hapi/hapi");
+//jwt
+const Jwt = require("@hapi/jwt");
 //album
-const albums = require('./api/albums');
-const AlbumService = require('./service/albums/AlbumServices');
-const AlbumValidator = require('./validator/albums/index');
+const albums = require("./api/albums");
+const AlbumService = require("./service/albums/AlbumServices");
+const AlbumValidator = require("./validator/albums/index");
 //songs
-const songs = require('./api/songs');
-const SongsService = require('./service/songs/SongsServices');
-const SongsValidator = require('./validator/songs/index');
+const songs = require("./api/songs");
+const SongsService = require("./service/songs/SongsServices");
+const SongsValidator = require("./validator/songs/index");
 
 //user
-const users = require('./api/user');
-const UsersService = require('./service/users/UsersService');
-const UsersValidator = require('./validator/user');
-const ClientError = require('./exceptions/ClientError');
+const users = require("./api/user");
+const UsersService = require("./service/users/UsersService");
+const UsersValidator = require("./validator/user");
+const ClientError = require("./exceptions/ClientError");
+
+//authentications
+const authentications = require("./api/authentications");
+const AuthenticationsService = require("./service/authentications/AuthenticationsService");
+const TokenManager = require("./tokenize/TokenManager");
+const AuthenticationsValidator = require("./validator/authentications");
 
 const init = async () => {
   const albumService = new AlbumService();
@@ -23,24 +31,25 @@ const init = async () => {
   const songsService = new SongsService();
   const songsValidator = SongsValidator;
   const usersService = new UsersService();
+  const authenticationsService = new AuthenticationsService();
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
     routes: {
       cors: {
-        origin: ['*'],
+        origin: ["*"],
       },
     },
   });
 
-  server.ext('onPreResponse', (request, h) => {
+  server.ext("onPreResponse", (request, h) => {
     // Mendapatkan konteks response dari request
     const { response } = request;
     if (response instanceof Error) {
       // Penanganan client error secara internal.
       if (response instanceof ClientError) {
         const newResponse = h.response({
-          status: 'fail',
+          status: "fail",
           message: response.message,
         });
         newResponse.code(response.statusCode);
@@ -52,8 +61,8 @@ const init = async () => {
       }
       // Penanganan server error sesuai kebutuhan
       const newResponse = h.response({
-        status: 'error',
-        message: 'Terjadi kegagalan pada server kami',
+        status: "error",
+        message: "Terjadi kegagalan pada server kami",
       });
       newResponse.code(500);
       return newResponse;
@@ -61,6 +70,29 @@ const init = async () => {
     // Jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
     return h.continue;
   });
+  // registrasi plugin eksternal
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+    // mendefinisikan strategy autentikasi jwt
+    server.auth.strategy('openmusicapi_jwt', 'jwt', {
+      keys: process.env.ACCESS_TOKEN_KEY,
+      verify: {
+        aud: false,
+        iss: false,
+        sub: false,
+        maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      },
+      validate: (artifacts) => ({
+        isValid: true,
+        credentials: {
+          id: artifacts.decoded.payload.id,
+        },
+      }),
+    });
 
   await server.register([
     {
@@ -79,11 +111,20 @@ const init = async () => {
     },
     {
       plugin: users,
-      options:{
-        service:usersService,
-        validator: UsersValidator
-      }
-    }
+      options: {
+        service: usersService,
+        validator: UsersValidator,
+      },
+    },
+    {
+      plugin: authentications,
+      options: {
+        authenticationsService,
+        usersService,
+        tokenManager: TokenManager,
+        validator: AuthenticationsValidator,
+      },
+    },
   ]);
 
   await server.start();
