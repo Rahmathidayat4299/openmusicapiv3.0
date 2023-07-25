@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-dev": "nodemon ./src/server.js",
     "lint": "eslint ./src",
-    "migrate": "node-pg-migrate"
+    "migrate": "node-pg-migrate",
+    "start-dev": "nodemon ./src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +24,7 @@
     "pg": "^8.11.1"
   },
   "devDependencies": {
-    "eslint": "^8.43.0"
+    "eslint": "^8.43.0",
+    "nodemon": "^3.0.1"
   }
 }
