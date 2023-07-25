@@ -5,7 +5,7 @@ const AuthorizationError = require('../../exceptions/AuthenticationError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
-class PlaylistsService {
+class PlaylistsServices {
     constructor(collaborationService) {
         this._pool = new Pool();
         this._collaborationService = collaborationService;
@@ -137,4 +137,4 @@ class PlaylistsService {
     }
 }
 
-module.exports = PlaylistsService;
+module.exports = PlaylistsServices;

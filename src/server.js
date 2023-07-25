@@ -41,8 +41,9 @@ const init = async () => {
   const songsValidator = SongsValidator;
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
-  const playlistsServices = new PlaylistsService();
   const collaborationsService = new CollaborationsService();
+  const playlistsServices = new PlaylistsService(collaborationsService);
+  
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -55,8 +56,10 @@ const init = async () => {
 
   server.ext("onPreResponse", (request, h) => {
     // Mendapatkan konteks response dari request
+    console.log();
     const { response } = request;
     if (response instanceof Error) {
+      console.log(response);
       // Penanganan client error secara internal.
       if (response instanceof ClientError) {
         const newResponse = h.response({
