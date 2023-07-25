@@ -56,6 +56,17 @@ class PlaylistHandler {
     const { playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
+    // Memverifikasi apakah lagu dengan songId ada dalam sistem sebelum menambahkannya ke playlist
+    const songExists = await this._service.checkIfSongExists(songId);
+    if (!songExists) {
+      const response = h.response({
+        status: "error",
+        message: "Lagu dengan songId yang diberikan tidak ditemukan.",
+      });
+      response.code(404);
+      return response;
+    }
+
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
     await this._service.addSongToPlaylist(playlistId, songId);
     const response = h.response({

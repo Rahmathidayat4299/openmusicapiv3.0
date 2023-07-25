@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
-const AuthorizationError = require('../../exceptions/AuthenticationError');
+const AuthorizationError = require('../../exceptions/AuthorizationErorr');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
 
