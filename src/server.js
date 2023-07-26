@@ -27,13 +27,14 @@ const AuthenticationsValidator = require("./validator/authentications");
 
 //playlist
 const playlists = require("./api/playlists");
-const PlaylistsService = require('./service/playlists/PlaylistsServices');
-const PlaylistValidator = require('./validator/playlists');
+// const playlistsService = require('./service/playlists/PlaylistsServices');
+const PlaylistsServices = require("./service/playlists/PlaylistsServices");
+const PlaylistValidator = require("./validator/playlists");
 
 //collaborations
-const collaborations = require('./api/collaborations');
-const CollaborationsService = require('./service/collaborations/CollaborationsService');
-const CollaborationsValidator = require('./validator/collaborations');
+const collaborations = require("./api/collaborations");
+const CollaborationsService = require("./service/collaborations/CollaborationsService");
+const CollaborationsValidator = require("./validator/collaborations");
 const init = async () => {
   const albumService = new AlbumService();
   const albumValidator = AlbumValidator;
@@ -42,8 +43,8 @@ const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
-  const playlistsServices = new PlaylistsService(collaborationsService);
-  
+  const playlistsServices = new PlaylistsServices(collaborationsService);
+
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -53,37 +54,63 @@ const init = async () => {
       },
     },
   });
-
   server.ext("onPreResponse", (request, h) => {
-    // Mendapatkan konteks response dari request
-    console.log();
+    // mendapatkan konteks response dari request
     const { response } = request;
-    if (response instanceof Error) {
-      console.log(response);
-      // Penanganan client error secara internal.
-      if (response instanceof ClientError) {
-        const newResponse = h.response({
-          status: "fail",
-          message: response.message,
-        });
-        newResponse.code(response.statusCode);
-        return newResponse;
+    if (response instanceof ClientError) {
+      const newResponse = h.response({
+        status: "fail",
+        message: response.message,
+      });
+      newResponse.code(response.statusCode);
+      return newResponse;
+      // eslint-disable-next-line no-else-return
+    } else if (response instanceof Error) {
+      const { statusCode, payload } = response.output;
+      if (statusCode === 401) {
+        return h.response(payload).code(401);
       }
-      // Mempertahankan penanganan client error oleh Hapi secara native, seperti 404, dll.
-      if (!response.isServer) {
-        return h.continue;
-      }
-      // Penanganan server error sesuai kebutuhan
       const newResponse = h.response({
         status: "error",
-        message: "Terjadi kegagalan pada server kami",
+        message: "Maaf, terjadi kegagalan pada server kami.",
       });
+      console.log(response);
       newResponse.code(500);
       return newResponse;
     }
-    // Jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
-    return h.continue;
+    return response.continue || response;
   });
+
+  // server.ext("onPreResponse", (request, h) => {
+  //   // Mendapatkan konteks response dari request
+  //   console.log();
+  //   const { response } = request;
+  //   if (response instanceof Error) {
+  //     console.log(response);
+  //     // Penanganan client error secara internal.
+  //     if (response instanceof ClientError) {
+  //       const newResponse = h.response({
+  //         status: "fail",
+  //         message: response.message,
+  //       });
+  //       newResponse.code(response.statusCode);
+  //       return newResponse;
+  //     }
+  //     // Mempertahankan penanganan client error oleh Hapi secara native, seperti 404, dll.
+  //     if (!response.isServer) {
+  //       return h.continue;
+  //     }
+  //     // Penanganan server error sesuai kebutuhan
+  //     const newResponse = h.response({
+  //       status: "error",
+  //       message: "Terjadi kegagalan pada server kami",
+  //     });
+  //     newResponse.code(500);
+  //     return newResponse;
+  //   }
+  //   // Jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
+  //   return h.continue;
+  // });
   // registrasi plugin eksternal
   await server.register([
     {
@@ -91,22 +118,22 @@ const init = async () => {
     },
   ]);
 
-    // mendefinisikan strategy autentikasi jwt
-    server.auth.strategy('openmusicapi_jwt', 'jwt', {
-      keys: process.env.ACCESS_TOKEN_KEY,
-      verify: {
-        aud: false,
-        iss: false,
-        sub: false,
-        maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+  // mendefinisikan strategy autentikasi jwt
+  server.auth.strategy("openmusicapi_jwt", "jwt", {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
       },
-      validate: (artifacts) => ({
-        isValid: true,
-        credentials: {
-          id: artifacts.decoded.payload.id,
-        },
-      }),
-    });
+    }),
+  });
 
   await server.register([
     {
@@ -142,18 +169,18 @@ const init = async () => {
     {
       plugin: playlists,
       options: {
-        playlistsServices,
-        validator:PlaylistValidator
-      }
+        service: playlistsServices,
+        validator: PlaylistValidator,
+      },
     },
     {
-      plugin:collaborations,
+      plugin: collaborations,
       options: {
         collaborationsService,
         playlistsServices,
-        validator:CollaborationsValidator
-      }
-    }
+        validator: CollaborationsValidator,
+      },
+    },
   ]);
 
   await server.start();

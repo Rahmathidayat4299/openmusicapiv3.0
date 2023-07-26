@@ -4,6 +4,8 @@ class PlaylistHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
+    console.log('PlaylistHandler - Service:', this._service); // Tambahkan console log di sini
+    console.log('PlaylistHandler - Validator:', this._validator); // Tambahkan console log di sini
   }
 
   postPlaylistHandler = async (request, h) => {

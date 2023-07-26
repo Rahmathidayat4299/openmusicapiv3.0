@@ -135,6 +135,26 @@ class PlaylistsServices {
             }
         }
     }
+
+    // async checkIfSongExists(songId) {
+    //     const query = {
+    //         text: 'SELECT * FROM songs WHERE id = $1',
+    //         values: [songId],
+    //     };
+
+    //     const result = await this._pool.query(query);
+
+    //     return result.rows.length > 0;
+    // }
+    async checkIfSongExists(songId) {
+        const query = {
+          text: 'SELECT * FROM songs WHERE id = $1',
+          values: [songId],
+        };
+      
+        const result = await this._pool.query(query);
+        return result.rowCount > 0;
+      }
 }
 
 module.exports = PlaylistsServices;

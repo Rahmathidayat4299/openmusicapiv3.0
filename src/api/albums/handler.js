@@ -6,6 +6,8 @@ class AlbumHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
+    // console.log('AlbumHandler - Service:', this._service); // Tambahkan console log di sini
+    // console.log('AlbumHandler - Validator:', this._validator); // Tambahkan console log di sini
   }
 
   postAlbumHandler = async (request, h) => {

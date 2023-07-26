@@ -1,5 +1,5 @@
-/* eslint-disable no-undef */
 /* eslint-disable camelcase */
+/* eslint-disable no-undef */
 
 exports.up = (pgm) => {
     pgm.createTable('collaborations', {
@@ -39,3 +39,4 @@ exports.up = (pgm) => {
 exports.down = (pgm) => {
     pgm.dropTable('collaborations');
 };
+
