@@ -4,8 +4,8 @@ class PlaylistHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
-    console.log('PlaylistHandler - Service:', this._service); // Tambahkan console log di sini
-    console.log('PlaylistHandler - Validator:', this._validator); // Tambahkan console log di sini
+    // console.log('PlaylistHandler - Service:', this._service);
+    // console.log('PlaylistHandler - Validator:', this._validator);
   }
 
   postPlaylistHandler = async (request, h) => {
@@ -31,12 +31,14 @@ class PlaylistHandler {
   getPlaylistHandler = async (request, h) => {
     const { id: credentialId } = request.auth.credentials;
     const playlists = await this._service.getPlaylists(credentialId);
-    return {
+    const response = h.response({
       status: "success",
       data: {
         playlists,
       },
-    };
+    });
+    response.code(200);
+    return response;
   };
 
   deletePlaylistHandler = async (request, h) => {
@@ -46,10 +48,12 @@ class PlaylistHandler {
     await this._service.verifyPlaylistOwner(playlistId, credentialId);
     await this._service.deletePlaylistById(playlistId);
 
-    return {
+    const response = h.response({
       status: "success",
       message: "Playlist berhasil dihapus",
-    };
+    });
+    response.code(200);
+    return response;
   };
 
   postSongToPlaylistHandler = async (request, h) => {
@@ -58,11 +62,10 @@ class PlaylistHandler {
     const { playlistId } = request.params;
     const { id: credentialId } = request.auth.credentials;
 
-    // Memverifikasi apakah lagu dengan songId ada dalam sistem sebelum menambahkannya ke playlist
     const songExists = await this._service.checkIfSongExists(songId);
     if (!songExists) {
       const response = h.response({
-        status: "error",
+        status: "fail", // Perubahan status dari "error" menjadi "fail"
         message: "Lagu dengan songId yang diberikan tidak ditemukan.",
       });
       response.code(404);
@@ -78,22 +81,50 @@ class PlaylistHandler {
     response.code(201);
     return response;
   };
-
   getSongFromPlaylistHandler = async (request, h) => {
-    const { playlistId } = request.params;
-    const { id: credentialId } = request.auth.credentials;
+  const { playlistId } = request.params;
+  const { id: credentialId } = request.auth.credentials;
 
-    await this._service.verifyPlaylistAccess(playlistId, credentialId);
+  await this._service.verifyPlaylistAccess(playlistId, credentialId);
 
-    const songs = await this._service.getSongsFromPlaylist(playlistId);
+  const songs = await this._service.getSongsFromPlaylist(playlistId);
+  console.log('Received playlistId:', playlistId);
+  console.log('Authenticated credentialId:', credentialId);
 
-    return {
-      status: "success",
-      data: {
+  const response = h.response({
+    status: "success",
+    data: {
+      playlist: {
+        id: playlistId,
         songs,
       },
-    };
-  };
+    },
+  });
+  response.code(200);
+  return response;
+};
+
+
+  // getSongFromPlaylistHandler = async (request, h) => {
+  //   const { playlistId } = request.params;
+  //   const { id: credentialId } = request.auth.credentials;
+
+  //   await this._service.verifyPlaylistAccess(playlistId, credentialId);
+
+  //   const songs = await this._service.getSongsFromPlaylist(playlistId);
+
+  //   const response = h.response({
+  //     status: "success",
+  //     data: {
+  //       playlist: {
+  //         id: playlistId,
+  //         songs,
+  //       },
+  //     },
+  //   });
+  //   response.code(200);
+  //   return response;
+  // };
 
   deleteSongFromPlaylistHandler = async (request, h) => {
     const { playlistId } = request.params;
@@ -103,10 +134,12 @@ class PlaylistHandler {
     await this._service.verifyPlaylistAccess(playlistId, credentialId);
     await this._service.deleteSongFromPlaylist(playlistId, songId);
 
-    return {
+    const response = h.response({
       status: "success",
       message: "Lagu berhasil dihapus dari playlist",
-    };
+    });
+    response.code(200);
+    return response;
   };
 }
 
