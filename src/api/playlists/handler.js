@@ -65,7 +65,7 @@ class PlaylistHandler {
     const songExists = await this._service.checkIfSongExists(songId);
     if (!songExists) {
       const response = h.response({
-        status: "fail", // Perubahan status dari "error" menjadi "fail"
+        status: "fail",
         message: "Lagu dengan songId yang diberikan tidak ditemukan.",
       });
       response.code(404);
@@ -82,49 +82,29 @@ class PlaylistHandler {
     return response;
   };
   getSongFromPlaylistHandler = async (request, h) => {
-  const { playlistId } = request.params;
-  const { id: credentialId } = request.auth.credentials;
+    const { playlistId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
 
-  await this._service.verifyPlaylistAccess(playlistId, credentialId);
+    await this._service.verifyPlaylistAccess(playlistId, credentialId);
 
-  const songs = await this._service.getSongsFromPlaylist(playlistId);
-  console.log('Received playlistId:', playlistId);
-  console.log('Authenticated credentialId:', credentialId);
+    const songs = await this._service.getSongsFromPlaylist(playlistId);
 
-  const response = h.response({
-    status: "success",
-    data: {
-      playlist: {
-        id: playlistId,
-        songs,
+    const playlistDetails = await this._service.getPlaylistDetails(playlistId);
+
+    const response = h.response({
+      status: "success",
+      data: {
+        playlist: {
+          id: playlistId,
+          name: playlistDetails.name,
+          username: playlistDetails.username,
+          songs,
+        },
       },
-    },
-  });
-  response.code(200);
-  return response;
-};
-
-
-  // getSongFromPlaylistHandler = async (request, h) => {
-  //   const { playlistId } = request.params;
-  //   const { id: credentialId } = request.auth.credentials;
-
-  //   await this._service.verifyPlaylistAccess(playlistId, credentialId);
-
-  //   const songs = await this._service.getSongsFromPlaylist(playlistId);
-
-  //   const response = h.response({
-  //     status: "success",
-  //     data: {
-  //       playlist: {
-  //         id: playlistId,
-  //         songs,
-  //       },
-  //     },
-  //   });
-  //   response.code(200);
-  //   return response;
-  // };
+    });
+    response.code(200);
+    return response;
+  };
 
   deleteSongFromPlaylistHandler = async (request, h) => {
     const { playlistId } = request.params;
