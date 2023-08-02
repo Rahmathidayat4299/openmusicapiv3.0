@@ -35,6 +35,11 @@ const PlaylistValidator = require("./validator/playlists");
 const collaborations = require("./api/collaborations");
 const CollaborationsService = require("./service/collaborations/CollaborationsService");
 const CollaborationsValidator = require("./validator/collaborations");
+
+//exports
+const _exports = require("./api/exports");
+const ProducerService = require("./service/rabbitmq/ProducerService");
+const ExportsValidator = require("./validator/exports");
 const init = async () => {
   const albumService = new AlbumService();
   const albumValidator = AlbumValidator;
@@ -44,6 +49,7 @@ const init = async () => {
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
   const playlistsServices = new PlaylistsServices(collaborationsService);
+  // const producerService = new ProducerService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -81,36 +87,6 @@ const init = async () => {
     return response.continue || response;
   });
 
-  // server.ext("onPreResponse", (request, h) => {
-  //   // Mendapatkan konteks response dari request
-  //   console.log();
-  //   const { response } = request;
-  //   if (response instanceof Error) {
-  //     console.log(response);
-  //     // Penanganan client error secara internal.
-  //     if (response instanceof ClientError) {
-  //       const newResponse = h.response({
-  //         status: "fail",
-  //         message: response.message,
-  //       });
-  //       newResponse.code(response.statusCode);
-  //       return newResponse;
-  //     }
-  //     // Mempertahankan penanganan client error oleh Hapi secara native, seperti 404, dll.
-  //     if (!response.isServer) {
-  //       return h.continue;
-  //     }
-  //     // Penanganan server error sesuai kebutuhan
-  //     const newResponse = h.response({
-  //       status: "error",
-  //       message: "Terjadi kegagalan pada server kami",
-  //     });
-  //     newResponse.code(500);
-  //     return newResponse;
-  //   }
-  //   // Jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
-  //   return h.continue;
-  // });
   // registrasi plugin eksternal
   await server.register([
     {
@@ -179,6 +155,14 @@ const init = async () => {
         collaborationsService,
         playlistsServices,
         validator: CollaborationsValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        producerService: ProducerService,
+        playlistsServices,
+        validator: ExportsValidator,
       },
     },
   ]);
