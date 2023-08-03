@@ -6,8 +6,8 @@ class ExportsHandler {
     this._validator = validator;
 
     // Tambahkan console log untuk memeriksa apakah playlistsServices terdefinisi atau tidak
-    console.log("playlistsServices:", playlistsServices);
-    console.log("service:", service);
+    // console.log("playlistsServices:", playlistsServices);
+    // console.log("service:", service);
   }
 
   async postExportPlaylistHandler(request, h) {
