@@ -40,7 +40,7 @@ class AlbumServices {
 
   async getAlbumById(id) {
     const query = {
-      text: 'SELECT id, name, year FROM albums WHERE id = $1',
+      text: 'SELECT id, name, year, cover as "coverUrl" FROM albums WHERE id = $1',
       values: [id],
     };
 
