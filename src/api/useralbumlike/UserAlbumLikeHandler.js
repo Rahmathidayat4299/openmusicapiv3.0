@@ -13,7 +13,7 @@ class UserAlbumLikeHandler {
       const { id: albumId } = request.params;
   
       await this._albumServices.getAlbumById(albumId);
-      const alreadyLike = await this.userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
+      const alreadyLike = await this._userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
   
       if (!alreadyLike) {
         await this._userLikesAlbumService.likeAlbum(credentialId, albumId);

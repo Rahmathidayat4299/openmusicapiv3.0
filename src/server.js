@@ -115,6 +115,7 @@ const init = async () => {
           message: response.message,
         });
         newResponse.code(response.statusCode);
+        console.log(response);
         return newResponse;
       }
       // mempertahankan penanganan client error oleh hapi secara native, seperti 404, etc.
