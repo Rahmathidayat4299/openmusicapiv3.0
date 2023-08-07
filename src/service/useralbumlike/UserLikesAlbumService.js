@@ -50,8 +50,7 @@ class UserAlbumLikesService {
       console.error("Error in unlikeAlbum:", error);
       throw error;
     }
-};
-
+  };
 
   getAlbumLike = async (albumId) => {
     try {
@@ -96,7 +95,7 @@ class UserAlbumLikesService {
     console.log(result);
 
     if (result.rowCount > 0) {
-      throw new InvariantError('User sudah menyukai album');
+      throw new InvariantError("User sudah menyukai album");
     }
   }
 }

@@ -18,18 +18,18 @@ class UserAlbumLikeHandler {
   async postUserAlbumLikeHandler(request, h) {
     // console.log("Request Params:", request.params);
 
-    const { id: credentialId } = request.auth.credentials;
-    // console.log("Credential ID:", credentialId);
+    const { id: id } = request.auth.credentials;
+    // console.log("Credential ID:", id);
 
     const { id: albumId } = request.params;
     console.log("Album ID:", albumId);
     await this._albumServices.getAlbumById(albumId);
-    await this._userLikesAlbumService.verifyAlbumLike(albumId, credentialId);
+    await this._userLikesAlbumService.verifyAlbumLike(albumId, id);
 
-    //   const alreadyLike = await this._userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
+    //   const alreadyLike = await this._userLikesAlbumService.verifyAlbumLike(id, albumId);
 
     const addalbumlike = await this._userLikesAlbumService.likeAlbum(
-      credentialId,
+      id,
       albumId
     );
 
@@ -74,7 +74,7 @@ class UserAlbumLikeHandler {
     response.code(200);
     return response;
   }
-  async deleteAlbumLikeHandler(request,) {
+  async deleteAlbumLikeHandler(request) {
     const { id: userId } = request.auth.credentials;
     const { id } = request.params;
 
