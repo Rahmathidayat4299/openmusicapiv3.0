@@ -24,9 +24,21 @@ exports.up = (pgm) => {
   });
 
   pgm.addConstraint(
-    "user_album_likes",
-    "unique_fk_user_id__album_id",
-    "UNIQUE(user_id, album_id)"
+    'user_album_likes',
+    'unique_album_id_and_user_id',
+    'UNIQUE(album_id, user_id)',
+  );
+
+  // memberikan constraint foreign key pada kolom album_id dan user_id terhadap albums.id dan users.id
+  pgm.addConstraint(
+    'user_album_likes',
+    'fk_user_album_likes.user_id_users.id',
+    'FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE',
+  );
+  pgm.addConstraint(
+    'user_album_likes',
+    'fk_user_album_likes.album_id_albums.id',
+    'FOREIGN KEY(album_id) REFERENCES albums(id) ON DELETE CASCADE',
   );
 };
 

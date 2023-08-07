@@ -8,6 +8,7 @@ class UserAlbumLikesService {
   constructor(cacheService) {
     this._pool = new Pool();
     this._cacheService = cacheService;
+    console.log("CacheService",cacheService);
   }
 
   likeAlbum = async (userId, albumId) => {
@@ -24,23 +25,33 @@ class UserAlbumLikesService {
       throw new InvariantError("User gagal like album");
     }
 
-    await this._cacheService.remove(`album-like:${albumId}`);
+    await this._cacheService.delete(`album-like:${albumId}`);
   };
 
   unlikeAlbum = async (userId, albumId) => {
+    console.log("User ID:", userId);
+    console.log("Album ID:", albumId);
+
     const query = {
       text: "DELETE FROM user_album_likes WHERE user_id = $1 AND album_id = $2 RETURNING id",
       values: [userId, albumId],
     };
 
-    const result = await this._pool.query(query);
+    try {
+      const result = await this._pool.query(query);
+      console.log("Result:", result);
 
-    if (!result.rowCount) {
-      throw new NotFoundError("User gagal unlike album");
+      if (!result.rowCount) {
+        throw new NotFoundError("User gagal unlike album");
+      }
+
+      await this._cacheService.delete(`album-like:${albumId}`);
+    } catch (error) {
+      console.error("Error in unlikeAlbum:", error);
+      throw error;
     }
+};
 
-    await this._cacheService.remove(`album-like:${albumId}`);
-  };
 
   getAlbumLike = async (albumId) => {
     try {
@@ -68,16 +79,25 @@ class UserAlbumLikesService {
     }
   };
 
-  verifyAlbumLike = async (userId, albumId) => {
+  async verifyAlbumLike(id, userId) {
     const query = {
-      text: "SELECT * FROM user_album_likes WHERE user_id = $1 AND album_id = $2",
-      values: [userId, albumId],
+      text: `SELECT * FROM user_album_likes
+      WHERE EXISTS (
+        SELECT 1 FROM albums
+        WHERE albums.id = user_album_likes.album_id AND albums.id = $1
+      )
+      AND EXISTS (
+        SELECT 1 FROM users
+        WHERE users.id = user_album_likes.user_id AND users.id = $2
+      )`,
+      values: [id, userId],
     };
-
     const result = await this._pool.query(query);
 
-    return result.rowCount;
-  };
+    if (result.rowCount > 0) {
+      throw new InvariantError('User sudah menyukai album');
+    }
+  }
 }
 
 module.exports = UserAlbumLikesService;

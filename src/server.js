@@ -49,9 +49,9 @@ const StorageService = require("./service/storage/StorageService");
 const UploadsValidator = require("./validator/uploads");
 
 // user album like
-const userAlbumLikes = require('./api/useralbumlike');
-const UserAlbumLikesService = require('./service/useralbumlike/UserLikesAlbumService');
-const CacheService = require('./service/redis/CacheService');
+const userAlbumLikes = require("./api/useralbumlike");
+const UserAlbumLikesService = require("./service/useralbumlike/UserLikesAlbumService");
+const CacheService = require("./service/redis/CacheService");
 const init = async () => {
   const albumService = new AlbumService();
   const albumValidator = AlbumValidator;
@@ -103,19 +103,19 @@ const init = async () => {
   //   }
   //   return response.continue || response;
   // });
-  server.ext('onPreResponse', (request, h) => {
+  server.ext("onPreResponse", (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request;
     if (response instanceof Error) {
- 
+      console.log(response);
       // penanganan client error secara internal.
       if (response instanceof ClientError) {
         const newResponse = h.response({
-          status: 'fail',
+          status: "fail",
           message: response.message,
         });
         newResponse.code(response.statusCode);
-        console.log(response);
+
         return newResponse;
       }
       // mempertahankan penanganan client error oleh hapi secara native, seperti 404, etc.
@@ -124,8 +124,8 @@ const init = async () => {
       }
       // penanganan server error sesuai kebutuhan
       const newResponse = h.response({
-        status: 'error',
-        message: 'terjadi kegagalan pada server kami',
+        status: "error",
+        message: "terjadi kegagalan pada server kami",
       });
       newResponse.code(500);
       return newResponse;
@@ -226,7 +226,7 @@ const init = async () => {
       plugin: userAlbumLikes,
       options: {
         userLikesAlbumService,
-        albumServices:albumService,
+        albumServices: albumService,
       },
     },
   ]);

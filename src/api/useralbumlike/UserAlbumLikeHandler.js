@@ -1,62 +1,140 @@
 /* eslint-disable no-undef */
 class UserAlbumLikeHandler {
-    constructor(userLikesAlbumService, albumServices) {
+  constructor(userLikesAlbumService, albumServices) {
       this._userLikesAlbumService = userLikesAlbumService;
       this._albumServices = albumServices;
-      console.log("albumservice",albumServices);
-      console.log("useralbumlikeservice",userLikesAlbumService);
+      console.log("albumservice", albumServices);
+      console.log("useralbumlikeservice", userLikesAlbumService);
 
-    }
-  
-    async postUserAlbumLikeHandler(request, h) {
-      const { id: credentialId } = request.auth.credentials;
-      const { id: albumId } = request.params;
-  
-      await this._albumServices.getAlbumById(albumId);
-      const alreadyLike = await this._userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
-  
-      if (!alreadyLike) {
-        await this._userLikesAlbumService.likeAlbum(credentialId, albumId);
-      } else {
-        await this._userLikesAlbumService.unlikeAlbum(credentialId, albumId);
+      if (!this._albumServices) {
+          console.error("ERROR: AlbumServices not initialized properly.");
       }
-  
-      const response = h.response({
-        status: 'success',
-        message: 'Berhasil like/unlike albums',
-      });
-      response.code(201);
-      return response;
-    }
-  
-    async getUserAlbumLikeHandler(request, h) {
+
+      if (!this._userLikesAlbumService) {
+          console.error("ERROR: UserLikesAlbumService not initialized properly.");
+      }
+  }
+
+  async postUserAlbumLikeHandler(request, h) {
+      console.log("Request Params:", request.params);
+
+      const { id: credentialId } = request.auth.credentials;
+      console.log("Credential ID:", credentialId);
+
+      const { id: albumId } = request.params;
+      console.log("Album ID:", albumId);
+      await this._albumServices.getAlbumById(albumId);
+      await this._userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
+      
+      
+    //   const alreadyLike = await this._userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
+
+    
+
+    const addalbumlike = await this._userLikesAlbumService.likeAlbum(credentialId,albumId );
+
+    const response = h.response({
+      status: 'success',
+      message: 'Berhasil menyukai album',
+      data: {
+        addalbumlike,
+      },
+    });
+    response.code(201);
+    return response;
+  }
+
+  async getUserAlbumLikeHandler(request, h) {
       const { id } = request.params;
-  
+      console.log("Album ID:", id);
+
       await this._albumServices.getAlbumById(id);
-  
+
       const { likes, from } = await this._userLikesAlbumService.getAlbumLike(id);
-  
+
       if (from === 'cache') {
-        const response = h.response({
+          const response = h.response({
+              status: 'success',
+              data: {
+                  likes,
+              },
+          });
+          response.code(200);
+          response.header('X-Data-Source', from);
+          return response;
+      }
+
+      const response = h.response({
           status: 'success',
           data: {
-            likes,
+              likes,
           },
-        });
-        response.code(200);
-        response.header('X-Data-Source', from);
-        return response;
-      }
-  
-      const response = h.response({
-        status: 'success',
-        data: {
-          likes,
-        },
       });
       response.code(200);
       return response;
-    }
   }
+}
+
+module.exports = UserAlbumLikeHandler;
+
+// class UserAlbumLikeHandler {
+//     constructor(userLikesAlbumService, albumServices) {
+//       this._userLikesAlbumService = userLikesAlbumService;
+//       this._albumServices = albumServices;
+//       console.log("albumservice",albumServices);
+//       console.log("useralbumlikeservice",userLikesAlbumService);
+
+//     }
   
-  module.exports = UserAlbumLikeHandler;
+//     async postUserAlbumLikeHandler(request, h) {
+//       const { id: credentialId } = request.auth.credentials;
+//       const { id: albumId } = request.params;
+  
+//       await this._albumServices.getAlbumById(albumId);
+//       const alreadyLike = await this._userLikesAlbumService.verifyAlbumLike(credentialId, albumId);
+  
+//       if (!alreadyLike) {
+//         await this._userLikesAlbumService.likeAlbum(credentialId, albumId);
+//       } else {
+//         await this._userLikesAlbumService.unlikeAlbum(credentialId, albumId);
+//       }
+  
+//       const response = h.response({
+//         status: 'success',
+//         message: 'Berhasil like/unlike albums',
+//       });
+//       response.code(201);
+//       return response;
+//     }
+  
+//     async getUserAlbumLikeHandler(request, h) {
+//       const { id } = request.params;
+  
+//       await this._albumServices.getAlbumById(id);
+  
+//       const { likes, from } = await this._userLikesAlbumService.getAlbumLike(id);
+  
+//       if (from === 'cache') {
+//         const response = h.response({
+//           status: 'success',
+//           data: {
+//             likes,
+//           },
+//         });
+//         response.code(200);
+//         response.header('X-Data-Source', from);
+//         return response;
+//       }
+  
+//       const response = h.response({
+//         status: 'success',
+//         data: {
+//           likes,
+//         },
+//       });
+//       response.code(200);
+//       return response;
+//     }
+//   }
+  
+//   module.exports = UserAlbumLikeHandler;
