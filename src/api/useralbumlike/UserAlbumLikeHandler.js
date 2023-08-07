@@ -74,11 +74,11 @@ class UserAlbumLikeHandler {
     response.code(200);
     return response;
   }
-  async deleteAlbumLikeHandler(request) {
+  async deleteAlbumLikeHandler(request,) {
     const { id: userId } = request.auth.credentials;
-    const { albumId } = request.params;
+    const { id } = request.params;
 
-    await this._userLikesAlbumService.unlikeAlbum(userId, albumId);
+    await this._userLikesAlbumService.unlikeAlbum(userId, id);
     return {
       status: "success",
       message: "Like berhasil dihapus dari album",
