@@ -8,7 +8,7 @@ class UserAlbumLikesService {
   constructor(cacheService) {
     this._pool = new Pool();
     this._cacheService = cacheService;
-    console.log("CacheService",cacheService);
+    // console.log("CacheService",cacheService);
   }
 
   likeAlbum = async (userId, albumId) => {

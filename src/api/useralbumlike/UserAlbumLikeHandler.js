@@ -3,8 +3,8 @@ class UserAlbumLikeHandler {
   constructor(userLikesAlbumService, albumServices) {
     this._userLikesAlbumService = userLikesAlbumService;
     this._albumServices = albumServices;
-    console.log("albumservice", albumServices);
-    console.log("useralbumlikeservice", userLikesAlbumService);
+    // console.log("albumservice", albumServices);
+    // console.log("useralbumlikeservice", userLikesAlbumService);
 
     if (!this._albumServices) {
       console.error("ERROR: AlbumServices not initialized properly.");
@@ -16,10 +16,10 @@ class UserAlbumLikeHandler {
   }
 
   async postUserAlbumLikeHandler(request, h) {
-    console.log("Request Params:", request.params);
+    // console.log("Request Params:", request.params);
 
     const { id: credentialId } = request.auth.credentials;
-    console.log("Credential ID:", credentialId);
+    // console.log("Credential ID:", credentialId);
 
     const { id: albumId } = request.params;
     console.log("Album ID:", albumId);
@@ -46,12 +46,12 @@ class UserAlbumLikeHandler {
 
   async getUserAlbumLikeHandler(request, h) {
     const { id } = request.params;
-    console.log("Album ID:", id);
+    // console.log("Album ID:", id);
 
     await this._albumServices.getAlbumById(id);
 
     const { likes, from } = await this._userLikesAlbumService.getAlbumLike(id);
-    console.log("likeandfrom", likes, from);
+    // console.log("likeandfrom", likes, from);
 
     if (from === "cache") {
       const response = h.response({
