@@ -93,6 +93,7 @@ class UserAlbumLikesService {
       values: [id, userId],
     };
     const result = await this._pool.query(query);
+    console.log(result);
 
     if (result.rowCount > 0) {
       throw new InvariantError('User sudah menyukai album');
